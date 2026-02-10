@@ -1,0 +1,22 @@
+speechrecognition
+pytz
+schedule
+requests
+dateparser
+openai
+wolframalpha
+newsapi-python
+
+# Recommended additions for improved TTS, STT, LLM orchestration, scraping, and scheduling
+pyttsx3
+langchain
+sentence-transformers
+beautifulsoup4
+lxml
+apscheduler
+python-dotenv
+transformers
+torch
+sounddevice
+soundfile
+numpy

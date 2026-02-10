@@ -1,0 +1,24 @@
+{
+  "system": {
+    "name": "Huzenix",
+    "version": "2.0.0",
+    "description": "Modular voice-based AI assistant"
+  },
+  "voice": {
+    "wake_words": ["huzenix", "hey huzenix", "ok huzenix", "hello", "hi"],
+    "listen_timeout": 5.0,
+    "phrase_time_limit": 8.0
+  },
+  "features": {
+    "reminders": true,
+    "notes": true,
+    "weather": true,
+    "calculator": true,
+    "files": true,
+    "chat": false
+  },
+  "api_keys": {
+    "openai": null,
+    "weather": null
+  }
+}
