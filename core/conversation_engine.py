@@ -7,7 +7,7 @@ from typing import Callable, Dict
 from core.intent_parser import Intent, IntentParser
 from core.llm_client import ask_llm
 
-CONFIDENCE_THRESHOLD = 0.35
+CONFIDENCE_THRESHOLD = 0.45  # ⬅ slightly relaxed
 ROLE_USER = "user"
 ROLE_ASSISTANT = "assistant"
 
@@ -15,8 +15,8 @@ ROLE_ASSISTANT = "assistant"
 class ConversationEngine:
     """
     Brain of Huzenix.
-    - High confidence → command handlers
-    - Low confidence → LLM conversation
+    - Conversation-first
+    - Commands only when confidence is clear
     """
 
     def __init__(self):
@@ -30,31 +30,37 @@ class ConversationEngine:
         try:
             intent, confidence = self.intent_parser.parse(query)
 
+            # EXIT → no memory pollution
+            if intent == Intent.EXIT:
+                return Intent.EXIT
+
             # 🔐 Security gate
             if security_manager and self.intent_parser.requires_security(intent):
                 if security_manager.is_locked():
                     return "System locked hai. Pehle unlock karo."
 
-            # 🧠 Memory: store user message
+            # 🧠 Store user message (non-exit)
             if memory:
                 memory.add_message(ROLE_USER, query)
 
-            # EXIT intent
-            if intent == Intent.EXIT:
-                return Intent.EXIT
-
-            # 🧠 Decide conversation vs command
+            # 🧠 Conversation FIRST
             if intent == Intent.CONVERSATION or confidence < CONFIDENCE_THRESHOLD:
                 reply = ask_llm(query, memory)
                 if memory:
                     memory.add_message(ROLE_ASSISTANT, reply)
                 return reply
 
-            # 🛠 Command handling (ONLY query passed)
+            # 🛠 Command handling
             handler = self.handlers.get(intent)
             if handler:
                 response = handler(query)
-                return response if response else "Done."
+                response = response if response else "Done."
+
+                # ✅ Store command response too
+                if memory:
+                    memory.add_message(ROLE_ASSISTANT, response)
+
+                return response
 
             # 🤖 Fallback → LLM
             reply = ask_llm(query, memory)
