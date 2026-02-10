@@ -42,7 +42,6 @@ class HuzenixApp:
     """Main application router and lifecycle manager."""
 
     def __init__(self):
-        # Paths
         self.data_dir = Path(__file__).parent / "data"
         self.data_dir.mkdir(exist_ok=True)
 
@@ -62,10 +61,9 @@ class HuzenixApp:
         self._register_handlers()
         self._load_plugins()
 
-        # Scheduler
         schedule.every(60).seconds.do(self.reminders.check_and_trigger)
 
-    # ---------------- ENGINE REGISTRATION ---------------- #
+    # ---------- ENGINE REGISTRATION ---------- #
 
     def _register_handlers(self):
         self.engine.register_handler(Intent.TIME, self._time)
@@ -82,7 +80,7 @@ class HuzenixApp:
         if CHAT_PLUGIN_AVAILABLE:
             ChatPlugin().register(self.engine)
 
-    # ---------------- PURE HANDLERS (NO I/O) ---------------- #
+    # ---------- PURE HANDLERS ---------- #
 
     def _time(self, _: str) -> str:
         return datetime.now().strftime("Abhi time %I:%M %p hai.")
@@ -100,7 +98,7 @@ class HuzenixApp:
 
     def _notes(self, query: str) -> str:
         if self.security.is_locked():
-            return "Notes access karne ke liye system unlock karo."
+            return "Notes ke liye system unlock karo."
         return self.notes.handle_command(query)
 
     def _calculator(self, query: str) -> str:
@@ -108,29 +106,26 @@ class HuzenixApp:
 
     def _files(self, query: str) -> str:
         if self.security.is_locked():
-            return "File operations ke liye system unlock karo."
+            return "File access ke liye system unlock karo."
         return self.file_manager.handle_command(query)
 
     def _help(self, _: str) -> str:
         return (
             "Tum mujhse normally baat kar sakte ho ya commands bol sakte ho.\n"
-            "Examples: time, date, weather, notes, reminders, calculator, files."
+            "Examples: time, date, weather, notes, reminders, calculator."
         )
 
     def _exit(self, _: str):
         return AppSignal.EXIT
 
-    # ---------------- MAIN LOOP ---------------- #
+    # ---------- MAIN LOOP ---------- #
 
     def run(self):
         speak("Huzenix online hai. Wake word bolo.")
 
         while True:
-            # 🔊 Wait for wake word (blocking)
             wait_for_wake_word()
-
-            print("✅ Wake word detected.")
-            speak("Haan, boliye.")
+            speak("Haan, bolo.")
 
             while True:
                 schedule.run_pending()
@@ -139,12 +134,12 @@ class HuzenixApp:
                 if not query:
                     time.sleep(0.2)
                     continue
-                print("✅ Query received:", query)
 
+                print("🗣 User:", query)
                 result = self.engine.process(query, self.security)
 
-                if result == "__EXIT__":
-                    speak("Goodbye. Phir milte hain.")
+                if result == AppSignal.EXIT:
+                    speak("Theek hai, standby mode.")
                     break
 
                 if result:
@@ -155,4 +150,5 @@ class HuzenixApp:
 
 if __name__ == "__main__":
     HuzenixApp().run()
+
 
