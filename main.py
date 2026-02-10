@@ -11,12 +11,12 @@ from enum import Enum, auto
 
 # Core
 from core.voice_input import listen
-from core.wake_word import wait_for_wake_word
 from core.voice_output import speak
 from core.security import SecurityManager
 from core.conversation_engine import ConversationEngine
 from core.intent_parser import Intent
 from core.memory_manager import MemoryManager
+
 
 # Modules
 from modules.reminders import ReminderManager
@@ -48,6 +48,7 @@ class HuzenixApp:
         # Core managers
         self.security = SecurityManager(self.data_dir)
         self.memory = MemoryManager(self.data_dir)
+        self.engine = ConversationEngine()
 
         # Feature modules
         self.reminders = ReminderManager(self.data_dir)
@@ -121,32 +122,44 @@ class HuzenixApp:
     # ---------- MAIN LOOP ---------- #
 
     def run(self):
-        speak("Huzenix online hai. Wake word bolo.")
+        speak("Huzenix online hai.")
 
         while True:
-            wait_for_wake_word()
-            speak("Haan, bolo.")
+         # 💤 Standby mode (wake word)
+            self.stt.wait_for_wake()
+            speak("Haan, bolo. Main sun raha hoon.")
 
+        # 🟢 Conversation mode
             while True:
                 schedule.run_pending()
 
                 query = listen()
+
                 if not query:
                     time.sleep(0.2)
                     continue
 
                 print("🗣 User:", query)
-                result = self.engine.process(query, self.security)
 
-                if result == AppSignal.EXIT:
+            # 🔚 Exit conversation (NOT exit app)
+                if query in ("exit", "stop", "ruk jao", "bye"):
                     speak("Theek hai, standby mode.")
                     break
+
+                result = self.engine.process(
+                    query,
+                    security_manager=self.security,
+                    memory=self.memory
+                )
+
+                if result == Intent.EXIT:
+                    speak("Theek hai, band ho raha hoon.")
+                    return  # full app exit
 
                 if result:
                     speak(result)
 
                 time.sleep(0.3)
-
 
 if __name__ == "__main__":
     HuzenixApp().run()

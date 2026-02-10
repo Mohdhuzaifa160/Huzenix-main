@@ -1,12 +1,15 @@
+"""
+Voice input interface for Huzenix.
+Thin wrapper over STTEngine.
+"""
+
 from core.stt_engine import STTEngine
 
 _stt = STTEngine()
 
-def listen() -> str:
-    text = _stt.get_next_command()
+def wait_for_wake_word():
+     _stt._wait_for_wake()
 
-    if text == "__WAKE__":
-        return ""
 
-    return text
-
+def listen() :
+    return _stt.listen_once()
