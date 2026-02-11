@@ -7,9 +7,8 @@ from core.stt_engine import STTEngine
 
 _stt = STTEngine()
 
-def wait_for_wake_word():
-     _stt._wait_for_wake()
+def wait_for_wake():
+    _stt.wait_for_wake()
 
-
-def listen() :
+def listen():
     return _stt.listen_once()

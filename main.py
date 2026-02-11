@@ -10,7 +10,7 @@ from datetime import datetime
 from enum import Enum, auto
 
 # Core
-from core.voice_input import listen
+from core.voice_input import listen, wait_for_wake
 from core.voice_output import speak
 from core.security import SecurityManager
 from core.conversation_engine import ConversationEngine
@@ -126,7 +126,7 @@ class HuzenixApp:
 
         while True:
          # 💤 Standby mode (wake word)
-            self.stt.wait_for_wake()
+            wait_for_wake()
             speak("Haan, bolo. Main sun raha hoon.")
 
         # 🟢 Conversation mode
