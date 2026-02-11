@@ -7,7 +7,7 @@ from core.voice_output import speak
 SAMPLE_RATE = 16000
 WAKE_WORDS = ("hello", "huzenix")
 
-MODEL_PATH = "models/vosk/vosk-model-small-en-us-0.15"
+MODEL_PATH = "models/vosk-model-small-en-in-0.4"
 
 audio_queue = queue.Queue()
 

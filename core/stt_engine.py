@@ -6,7 +6,7 @@ from vosk import Model, KaldiRecognizer
 
 SAMPLE_RATE = 16000
 BLOCK_SIZE = 8000
-VOSK_MODEL_PATH = "models/vosk/vosk-model-small-en-us-0.15"
+VOSK_MODEL_PATH = "models/vosk-model-small-en-in-0.4"
 WAKE_WORDS = ("hello", "huzenix", "hey huzenix")
 
 
