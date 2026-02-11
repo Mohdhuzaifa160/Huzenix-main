@@ -50,7 +50,7 @@ class ConversationEngine:
             # 🔥 CODING QUERIES → LLM FIRST (override intent)
             if self._is_coding_query(query):
                 reply = ask_llm(
-                    f"Answer like a senior developer. Be concise and code-first.\n{query}",
+                    f"Answer briefly and focus on code.\n{query}",
                     memory
                 )
                 if memory:
