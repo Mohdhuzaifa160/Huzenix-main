@@ -1,8 +1,8 @@
 import subprocess
 import os
-import tempfile
 import sounddevice as sd
 import soundfile as sf
+import tempfile
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -32,7 +32,8 @@ def _speak_piper(text: str):
         cmd = [
             PIPER_EXE,
             "--model", VOICE_MODEL,
-            "--output_file", wav_path
+            "--output_file", wav_path,
+            "--length_scale", "1.05"
         ]
 
         process = subprocess.Popen(
@@ -43,9 +44,7 @@ def _speak_piper(text: str):
             text=True
         )
 
-        process.stdin.write(text)
-        process.stdin.close()
-        process.wait()
+        process.communicate(input=text)
 
         data, sr = sf.read(wav_path, dtype="float32")
         sd.play(data, sr)

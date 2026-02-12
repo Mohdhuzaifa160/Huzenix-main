@@ -18,6 +18,7 @@ class Intent(Enum):
     HELP = "help"
     EXIT = "exit"
     CONVERSATION = "conversation"
+    CODE = "code"
 
 
 class IntentParser:
@@ -35,6 +36,7 @@ class IntentParser:
         Intent.HELP: ["help", "commands", "what can you do"],
         Intent.EXIT: ["exit", "quit", "bye", "goodbye"],
         Intent.CALCULATOR: ["calculate", "plus", "minus", "into", "divide", "+", "-", "*", "/"],
+        Intent.CODE: ["code", "program", "script", "run code", "execute code","run this code","execute this code"],
     }
 
     @staticmethod

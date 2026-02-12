@@ -11,27 +11,12 @@ WAKE_WORDS = ("hello", "huzenix", "hey huzenix")
 
 
 class STTEngine:
-    """
-    Conversational STT Engine
-    - Wake word switches mode
-    - Continuous listening after wake
-    """
-
     def __init__(self):
         self.audio_queue = queue.Queue()
         self.model = Model(VOSK_MODEL_PATH)
-        self.recognizer = None
-        self.stream = None
+        self.recognizer = KaldiRecognizer(self.model, SAMPLE_RATE)
 
-    # ---------- AUDIO ---------- #
-
-    def _callback(self, indata, frames, time_info, status):
-        self.audio_queue.put(bytes(indata))
-
-    def _start_stream(self):
-        if self.stream:
-            return
-
+        # 🔥 Stream always ON (low latency)
         self.stream = sd.RawInputStream(
             samplerate=SAMPLE_RATE,
             blocksize=BLOCK_SIZE,
@@ -40,15 +25,11 @@ class STTEngine:
             callback=self._callback,
         )
         self.stream.start()
-        self.recognizer = KaldiRecognizer(self.model, SAMPLE_RATE)
-        print("🎧 STT stream started")
 
-    def _stop_stream(self):
-        if self.stream:
-            self.stream.stop()
-            self.stream.close()
-            self.stream = None
-            print("🛑 STT stream stopped")
+        print("🎧 STT stream started (low latency mode)")
+
+    def _callback(self, indata, frames, time_info, status):
+        self.audio_queue.put(bytes(indata))
 
     def _reset(self):
         self.recognizer = KaldiRecognizer(self.model, SAMPLE_RATE)
@@ -58,11 +39,9 @@ class STTEngine:
             except queue.Empty:
                 break
 
-    # ---------- PUBLIC API ---------- #
+    # ---------- WAKE ---------- #
 
     def wait_for_wake(self):
-        """Blocks until wake word detected"""
-        self._start_stream()
         print("🛌 Waiting for wake word...")
 
         while True:
@@ -70,6 +49,7 @@ class STTEngine:
             if self.recognizer.AcceptWaveform(data):
                 result = json.loads(self.recognizer.Result())
                 text = result.get("text", "").lower().strip()
+
                 if not text:
                     continue
 
@@ -79,8 +59,9 @@ class STTEngine:
                     self._reset()
                     return
 
-    def listen_once(self, timeout=3) -> str:
-        """Listen for ONE sentence (conversation mode)"""
+    # ---------- LISTEN ---------- #
+
+    def listen_once(self, timeout=2.5):
         start = time.time()
 
         while True:
@@ -91,6 +72,7 @@ class STTEngine:
             if self.recognizer.AcceptWaveform(data):
                 result = json.loads(self.recognizer.Result())
                 text = result.get("text", "").lower().strip()
+
                 if text:
                     print("🗣 Heard:", text)
                     return text

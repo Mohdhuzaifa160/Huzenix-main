@@ -19,6 +19,7 @@ from core.memory_manager import MemoryManager
 
 
 # Modules
+from modules.code_runner import CodeRunner
 from modules.reminders import ReminderManager
 from modules.notes import NotesManager
 from modules.weather import WeatherManager
@@ -56,6 +57,7 @@ class HuzenixApp:
         self.weather = WeatherManager()
         self.calculator = Calculator()
         self.file_manager = FileManager()
+        self.code_runner = CodeRunner()
 
         # Conversation engine
         self.engine = ConversationEngine()
@@ -75,6 +77,7 @@ class HuzenixApp:
         self.engine.register_handler(Intent.CALCULATOR, self._calculator)
         self.engine.register_handler(Intent.FILES, self._files)
         self.engine.register_handler(Intent.HELP, self._help)
+        self.engine.register_handler(Intent.CODE, self._run_code)
         self.engine.register_handler(Intent.EXIT, self._exit)
 
     def _load_plugins(self):
@@ -115,6 +118,8 @@ class HuzenixApp:
             "Tum mujhse normally baat kar sakte ho ya commands bol sakte ho.\n"
             "Examples: time, date, weather, notes, reminders, calculator."
         )
+    def _run_code(self, query: str):
+        return self.code_runner.run_python(query)
 
     def _exit(self, _: str):
         return AppSignal.EXIT
